@@ -1,10 +1,42 @@
-import {StyleSheet, Text, View} from 'react-native';
+import {FlatList, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import {useRoute} from '@react-navigation/native';
+import attendance from '../../utils/attendance.json';
 
 export default function DetailUsers() {
   const route = useRoute();
   const data = route.params.item;
+  const userAttendance = attendance.data.filter(
+    item => item.user_id === data.id,
+  );
+  // console.log(userAttendance);
+  const mergedData = userAttendance.map(item => ({
+    ...data,
+    ...item,
+  }));
+
+  function calculateWorkHours(clock_in, clock_out) {
+    const clock_inTime = new Date(`2023-11-15T${clock_in}`);
+    const clock_outTime = new Date(`2023-11-15T${clock_out}`);
+
+    const timeDiff = clock_outTime - clock_inTime;
+
+    const hours = Math.floor(timeDiff / (60 * 60 * 1000));
+    const minutes = Math.floor((timeDiff % (60 * 60 * 1000)) / (60 * 1000));
+
+    let result = '';
+    if (hours > 0) {
+      result += `${hours} ${hours === 1 ? 'h' : 'h'}`;
+    }
+    if (minutes > 0) {
+      result += ` ${minutes} ${minutes === 1 ? 'minute' : 'm'}`;
+    }
+
+    return result.trim();
+  }
+
+  console.log(mergedData);
+
   return (
     <View style={styles.section}>
       <View style={styles.header}>
@@ -26,13 +58,28 @@ export default function DetailUsers() {
       </View>
       <View>
         <View>
-          <Text> History Absen</Text>
+          <Text> History Attendance</Text>
           <View style={styles.history}>
-            <Text> Date</Text>
-            <Text> Clock_in</Text>
-            <Text> Clock_out</Text>
-            <Text> Work Hours</Text>
+            <Text style={styles.col}> Date</Text>
+            <Text style={styles.col}> Clock_in</Text>
+            <Text style={styles.col}> Clock_out</Text>
+            <Text style={styles.col}> Work Hours</Text>
           </View>
+          <FlatList
+            data={mergedData}
+            renderItem={({item, index}) => {
+              return (
+                <View style={styles.history} key={index}>
+                  <Text style={styles.col}> {item?.date}</Text>
+                  <Text style={styles.col}> {item?.clock_in}</Text>
+                  <Text style={styles.col}> {item?.clock_out}</Text>
+                  <Text style={styles.col}>
+                    {calculateWorkHours(item?.clock_in, item?.clock_out)}
+                  </Text>
+                </View>
+              );
+            }}
+          />
         </View>
       </View>
     </View>
@@ -73,6 +120,11 @@ const styles = StyleSheet.create({
   history: {
     display: 'flex',
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    alignItems: 'center',
+    width: '100%',
+  },
+  col: {
+    flex: 1,
+    textAlign: 'center',
   },
 });

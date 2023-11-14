@@ -7,11 +7,11 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  FlatList,
 } from 'react-native';
 import Fontisto from 'react-native-vector-icons/Fontisto';
 import user from '../../utils/data.json';
 import {useNavigation} from '@react-navigation/native';
-import {FlatList} from 'react-native-gesture-handler';
 
 export default function HomePage() {
   const [search, setSearch] = useState('');
