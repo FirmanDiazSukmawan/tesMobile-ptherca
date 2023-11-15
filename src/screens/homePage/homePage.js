@@ -41,28 +41,30 @@ export default function HomePage() {
           value={search}
           placeholder="Search Name"
         />
-        <FlatList
-          data={filteredData}
-          renderItem={({item, index}) => {
-            return (
-              <TouchableOpacity style={styles.card} key={index}>
-                <View style={styles.username}>
-                  <Fontisto style={styles.icon} name="user-secret" />
-                  <View style={styles.text}>
-                    <Text>{item?.name}</Text>
-                    <Text>{item?.email}</Text>
-                    <Text>{item?.phone}</Text>
+        <View style={{height: '92.5%'}}>
+          <FlatList
+            data={filteredData}
+            renderItem={({item, index}) => {
+              return (
+                <TouchableOpacity style={styles.card} key={index}>
+                  <View style={styles.username}>
+                    <Fontisto style={styles.icon} name="user-secret" />
+                    <View style={styles.text}>
+                      <Text>{item?.name}</Text>
+                      <Text>{item?.email}</Text>
+                      <Text>{item?.phone}</Text>
+                    </View>
+                    <TouchableOpacity
+                      style={styles.button}
+                      onPress={() => detail(item)}>
+                      <Text>Attendance</Text>
+                    </TouchableOpacity>
                   </View>
-                  <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => detail(item)}>
-                    <Text>Attendance</Text>
-                  </TouchableOpacity>
-                </View>
-              </TouchableOpacity>
-            );
-          }}
-        />
+                </TouchableOpacity>
+              );
+            }}
+          />
+        </View>
       </View>
     </SafeAreaView>
   );
