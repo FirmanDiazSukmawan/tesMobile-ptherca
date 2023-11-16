@@ -8,20 +8,21 @@ import {
   TouchableOpacity,
   View,
   FlatList,
+  RefreshControl,
 } from 'react-native';
-import Fontisto from 'react-native-vector-icons/Fontisto';
-import user from '../../utils/data.json';
+import data from '../../utils/data';
 import {useNavigation} from '@react-navigation/native';
 
 export default function HomePage() {
   const [search, setSearch] = useState('');
   const navigation = useNavigation();
+  const [refresh, setRefresh] = useState(false);
 
   const filteredData = useMemo(() => {
     if (!search) {
-      return user?.data;
+      return data;
     }
-    return user?.data.filter(item =>
+    return data?.filter(item =>
       item?.name?.toLowerCase().includes(search?.toLowerCase()),
     );
   }, [search]);
@@ -31,36 +32,55 @@ export default function HomePage() {
     navigation.navigate('DetailUsers', {item});
   };
 
+  const onRefresh = async () => {
+    setRefresh(true);
+    try {
+      await filteredData();
+      setRefresh(false);
+    } catch (error) {
+      // console.error('Error refresh');
+    } finally {
+      setRefresh(false);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.section}>
-      {/* <Text style={styles.listUsers}>Attendance List</Text> */}
       <View style={styles.search}>
         <TextInput
           style={styles.input}
           onChangeText={setSearch}
           value={search}
           placeholder="Search Name"
+          placeholderTextColor="#A9A9A9"
+          color="black"
         />
-        <View style={{height: '92.5%'}}>
+        <View style={styles.flatList}>
           <FlatList
             data={filteredData}
+            refreshControl={
+              <RefreshControl refreshing={refresh} onRefresh={onRefresh} />
+            }
+            showsVerticalScrollIndicator={false}
             renderItem={({item, index}) => {
               return (
-                <TouchableOpacity style={styles.card} key={index}>
+                <View style={styles.card} key={index}>
                   <View style={styles.username}>
-                    <Fontisto style={styles.icon} name="user-secret" />
+                    <View style={styles.fotoProfile}>
+                      <Image source={item.avatar} style={styles.avatar} />
+                    </View>
                     <View style={styles.text}>
-                      <Text>{item?.name}</Text>
-                      <Text>{item?.email}</Text>
-                      <Text>{item?.phone}</Text>
+                      <Text style={styles.textName}>{item.name}</Text>
+                      <Text style={styles.textEmail}>{item.email}</Text>
+                      <Text style={styles.textPhone}>{item.phone}</Text>
                     </View>
                     <TouchableOpacity
                       style={styles.button}
                       onPress={() => detail(item)}>
-                      <Text>Attendance</Text>
+                      <Text style={styles.textAttendance}>Attendance</Text>
                     </TouchableOpacity>
                   </View>
-                </TouchableOpacity>
+                </View>
               );
             }}
           />
@@ -81,6 +101,12 @@ const styles = StyleSheet.create({
     fontSize: 25,
     paddingBottom: 25,
     fontWeight: 'bold',
+  },
+  avatar: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 100,
+    resizeMode: 'stretch',
   },
 
   search: {
@@ -112,7 +138,7 @@ const styles = StyleSheet.create({
   text: {
     paddingHorizontal: 20,
     display: 'flex',
-    width: '70%',
+    width: '60%',
   },
   username: {
     display: 'flex',
@@ -127,5 +153,34 @@ const styles = StyleSheet.create({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  fotoProfile: {
+    width: 50,
+    height: 50,
+    backgroundColor: 'gray',
+    borderRadius: 25,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  flatList: {height: '92.5%'},
+  textAttendance: {
+    fontSize: 13,
+    color: '#fff',
+  },
+  textName: {
+    fontSize: 14,
+    color: 'black',
+    fontWeight: '700',
+  },
+  textEmail: {
+    color: 'gray',
+    fontSize: 13,
+    fontWeight: '400',
+  },
+  textPhone: {
+    color: 'gray',
+    fontSize: 13,
+    fontWeight: '400',
   },
 });

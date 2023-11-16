@@ -5,11 +5,15 @@ import {
   TouchableOpacity,
   View,
   Alert,
+  Image,
+  RefreshControl,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import attendance from '../../utils/attendance.json';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import {calculateWorkHours} from '../../utils/calculate';
+import Back from '../../component/back';
 
 export default function DetailUsers() {
   const route = useRoute();
@@ -19,43 +23,25 @@ export default function DetailUsers() {
   const navigation = useNavigation();
   const [presentCount, setPresentCount] = useState(0);
   const [absentCount, setAbsentCount] = useState(0);
+  const [refresh, setRefresh] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTime(new Date());
-    }, 100000);
+    }, 1000);
 
     return () => clearInterval(interval);
   }, []);
 
   const userAttendance = attendance.data.filter(
-    item => item.user_id === data.id,
+    item => item?.user_id === data?.id,
   );
   // console.log(userAttendance);
   const mergedData = userAttendance.map(item => ({
     ...data,
     ...item,
   }));
-
-  function calculateWorkHours(clock_in, clock_out) {
-    const clock_inTime = new Date(`2023-11-15T${clock_in}`);
-    const clock_outTime = new Date(`2023-11-15T${clock_out}`);
-
-    const timeDiff = clock_outTime - clock_inTime;
-
-    const hours = Math.floor(timeDiff / (60 * 60 * 1000));
-    const minutes = Math.floor((timeDiff % (60 * 60 * 1000)) / (60 * 1000));
-
-    let result = '';
-    if (hours > 0) {
-      result += `${hours} ${hours === 1 ? 'h' : 'h'}`;
-    }
-    if (minutes > 0) {
-      result += ` ${minutes} ${minutes === 1 ? 'minute' : 'm'}`;
-    }
-
-    return result.trim();
-  }
+  // console.log(data);
 
   useEffect(() => {
     const counts = mergedData?.reduce(
@@ -77,112 +63,129 @@ export default function DetailUsers() {
   // console.log(absentCount);
 
   const absens = () => {
-    Alert.alert('Attendant Succes');
+    Alert.alert('ClockIn Successfuly');
   };
   const Adjustment = () => {
-    Alert.alert('Attendant back Succes');
+    Alert.alert('ClockOut Successfuly');
   };
 
-  const historyAttendance = () => {
-    navigation.navigate('HistoryAttendance', mergedData);
+  const historyAttendance = users => {
+    navigation.navigate('DetailAttendance', {
+      users,
+    });
+  };
+
+  const back = () => {
+    navigation.goBack();
+  };
+
+  const onRefresh = async () => {
+    setRefresh(true);
+    try {
+      await mergedData();
+      setRefresh(false);
+    } catch (error) {
+      // console.error('Error refresh');
+    } finally {
+      setRefresh(false);
+    }
   };
 
   return (
     <View style={styles.section}>
-      <View style={styles.header}>
-        <View style={styles.profile}>
-          <View style={styles.fotoProfile}>
-            <Text>{data?.avatar}</Text>
-          </View>
-          <View style={styles.btn}>
-            <TouchableOpacity style={styles.button} onPress={absens}>
-              <Text>Clock_in</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button1} onPress={Adjustment}>
-              <Text>Clock_out</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-        <Text style={styles.name}>{data?.name}</Text>
-        <Text style={styles.phone}>{data?.phone}</Text>
-        <Text style={styles.email}>{data?.email}</Text>
-        <View style={styles.time}>
-          <View style={styles.currenTime}>
-            <Text>
-              {currentTime.toLocaleDateString('id-ID', {
-                timeZone: 'Asia/Jakarta',
-              })}
-            </Text>
-            <Text>
-              {currentTime.toLocaleTimeString('id-ID', {
-                timeZone: 'Asia/Jakarta',
-              })}
-            </Text>
-          </View>
-        </View>
-        <View style={styles.total}>
-          <View
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              paddingRight: 10,
-            }}>
-            <Text>Total Pressent</Text>
-            <Text> {presentCount}</Text>
-          </View>
-
-          <View
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-            }}>
-            <Text>Total absens</Text>
-            <Text> {absentCount}</Text>
-          </View>
-        </View>
-      </View>
-      <View>
-        <View>
-          <View style={styles.body}>
-            <Text> History Attendance</Text>
-            <TouchableOpacity onPress={historyAttendance}>
-              <Text>See More {'=>'}</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.scheduleHead}>
-            <Text style={styles.colHead}> Date</Text>
-            <Text style={styles.colHead}> Clock_in</Text>
-            <Text style={styles.colHead}> Clock_out</Text>
-            <Text style={styles.colHead}> Work Hours</Text>
-          </View>
-          <SafeAreaView style={{height: '70%'}}>
-            <FlatList
-              data={mergedData}
-              renderItem={({item, index}) => {
-                const absent = item?.status_presence === 'present';
-                return (
-                  <View style={styles.schedule} key={index}>
-                    {!absent ? (
-                      <Text style={styles.col}> Absent</Text>
-                    ) : (
-                      <>
-                        <Text style={styles.col}> {item?.date}</Text>
-                        <Text style={styles.col}> {item?.clock_in}</Text>
-                        <Text style={styles.col}> {item?.clock_out}</Text>
-                        <Text style={styles.col}>
-                          {calculateWorkHours(item?.clock_in, item?.clock_out)}
-                        </Text>
-                      </>
-                    )}
+      <SafeAreaView>
+        <FlatList
+          data={mergedData}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refresh} onRefresh={onRefresh} />
+          }
+          renderItem={({item, index}) => {
+            const absent = item?.status_presence === 'present';
+            return (
+              <TouchableOpacity
+                style={styles.schedule}
+                key={index}
+                onPress={() => historyAttendance(item)}>
+                {!absent ? (
+                  <Text style={styles.col}> Absent</Text>
+                ) : (
+                  <>
+                    <Text style={styles.col}> {item?.date}</Text>
+                    <Text style={styles.col}> {item?.clock_in}</Text>
+                    <Text style={styles.col}> {item?.clock_out}</Text>
+                    <Text style={styles.col}>
+                      {calculateWorkHours(item?.clock_in, item?.clock_out)}
+                    </Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            );
+          }}
+          ListHeaderComponent={
+            <>
+              <Back pageTitle="Detail Users" back={back} />
+              <View style={styles.header}>
+                <View style={styles.profile}>
+                  <View style={styles.fotoProfile}>
+                    <Image source={data?.avatar} style={styles.avatar} />
                   </View>
-                );
-              }}
-            />
-          </SafeAreaView>
-        </View>
-      </View>
+                  <View style={styles.total}>
+                    <View style={styles.totalPresent}>
+                      <Text style={styles.textTotal}>Total Pressent</Text>
+                      <Text style={styles.textCount}> {presentCount}</Text>
+                    </View>
+
+                    <View style={styles.totalAbsens}>
+                      <Text style={styles.textTotal}>Total absens</Text>
+                      <Text style={styles.textCount}> {absentCount}</Text>
+                    </View>
+                  </View>
+                </View>
+                <View style={styles.dataUsers}>
+                  <View>
+                    <Text style={styles.name}>{data?.name}</Text>
+                    <Text style={styles.phone}>{data?.profession}</Text>
+                    <Text style={styles.phone}>{data?.phone}</Text>
+                    <Text style={styles.email}>{data?.email}</Text>
+                  </View>
+                  <View style={styles.time}>
+                    <View style={styles.currenTime}>
+                      <Text style={styles.timer}>
+                        {currentTime.toLocaleDateString('id-ID', {
+                          timeZone: 'Asia/Jakarta',
+                        })}
+                      </Text>
+                      <Text style={styles.timer}>
+                        {currentTime.toLocaleTimeString('id-ID', {
+                          timeZone: 'Asia/Jakarta',
+                        })}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+                <View style={styles.btn}>
+                  <TouchableOpacity style={styles.button} onPress={absens}>
+                    <Text style={styles.clockIn}>Clock In</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.button1} onPress={Adjustment}>
+                    <Text style={styles.clockIn}>Clock Out</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <View style={styles.body}>
+                <Text style={styles.textHistory}> History Attendance</Text>
+              </View>
+              <View style={styles.scheduleHead}>
+                <Text style={styles.colHead}> Date</Text>
+                <Text style={styles.colHead}> Clock_in</Text>
+                <Text style={styles.colHead}> Clock_out</Text>
+                <Text style={styles.colHead}> Work Hours</Text>
+              </View>
+            </>
+          }
+        />
+      </SafeAreaView>
     </View>
   );
 }
@@ -191,12 +194,13 @@ const styles = StyleSheet.create({
   section: {
     flex: 1,
     padding: 10,
+    backgroundColor: '#F5F5F5',
   },
   header: {
     display: 'flex',
     flexDirection: 'column',
     borderBottomWidth: 1,
-    height: '45%',
+    marginBottom: 15,
   },
   profile: {
     display: 'flex',
@@ -213,6 +217,12 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  avatar: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 50,
+    resizeMode: 'stretch',
   },
   name: {
     color: 'black',
@@ -232,14 +242,16 @@ const styles = StyleSheet.create({
   total: {
     display: 'flex',
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    width: '70%',
+    height: '50%',
+    justifyContent: 'space-evenly',
   },
   schedule: {
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
     width: '100%',
-    backgroundColor: 'gray',
+    backgroundColor: '#fff',
     marginVertical: 5,
     borderRadius: 10,
   },
@@ -248,7 +260,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     width: '100%',
-    backgroundColor: 'yellow',
+    backgroundColor: '#7D82D7',
     marginVertical: 5,
     borderRadius: 10,
   },
@@ -258,6 +270,9 @@ const styles = StyleSheet.create({
     height: 30,
     marginVertical: 5,
     textAlignVertical: 'center',
+    color: 'white',
+    fontSize: 13,
+    fontWeight: 'bold',
   },
   col: {
     flex: 1,
@@ -265,36 +280,34 @@ const styles = StyleSheet.create({
     height: 30,
     marginVertical: 5,
     textAlignVertical: 'center',
+    color: 'black',
   },
   time: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    height: '30%',
     justifyContent: 'center',
     borderRadius: 15,
-    width: '100%',
-    padding: 10,
   },
-  currenTime: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    backgroundColor: '#adb8b0',
-    height: '100%',
-    justifyContent: 'center',
-    borderRadius: 15,
-    width: '50%',
-  },
+  // currenTime: {
+  //   display: 'flex',
+  //   flexDirection: 'column',
+  //   alignItems: 'center',
+  //   height: '100%',
+  //   justifyContent: 'center',
+  //   borderRadius: 15,
+  //   width: '50%',
+  // },
   btn: {
     display: 'flex',
     flexDirection: 'row',
-    width: '70%',
-    height: '50%',
+    width: '100%',
+    height: 50,
     justifyContent: 'space-between',
+    marginVertical: 25,
   },
   button: {
-    backgroundColor: '#65ab7a',
+    backgroundColor: '#EFC81A',
     width: '45%',
     height: '100%',
     borderRadius: 12,
@@ -303,7 +316,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   button1: {
-    backgroundColor: '#fa192c',
+    backgroundColor: '#d3d3d3',
     width: '45%',
     height: '100%',
     borderRadius: 12,
@@ -316,5 +329,40 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     height: 30,
+  },
+  totalPresent: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    paddingRight: 10,
+  },
+  totalAbsens: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  dataUsers: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+    width: '100%',
+  },
+  timer: {
+    textAlign: 'right',
+    color: 'gray',
+  },
+  clockIn: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  textTotal: {
+    color: 'black',
+  },
+  textCount: {
+    color: 'gray',
+  },
+  textHistory: {
+    color: 'black',
   },
 });
