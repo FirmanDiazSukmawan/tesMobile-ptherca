@@ -403,10 +403,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     lineHeight: 22,
     fontFamily: 'Inter-SemiBold',
+    paddingBottom: 5,
   },
   cardLocation: {
     display: 'flex',
     flexDirection: 'row',
+    paddingBottom: 4,
   },
   textCardLocation: {
     fontSize: 12,
@@ -491,6 +493,7 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     lineHeight: 22,
     marginRight: 3,
+    color: '#A3A3A3',
   },
   popularPrice: {
     fontFamily: 'Inter-Medium',
