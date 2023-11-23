@@ -1,4 +1,11 @@
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {
+  Alert,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React, {useState} from 'react';
 import NewBack from '../../component/newBack';
 import iconImage from '../../assets/icon/solar_gallery-bold.png';
@@ -9,8 +16,11 @@ import fitnes from '../../assets/icon/dumbel.png';
 import breakFast from '../../assets/icon/coffe.png';
 import beach from '../../assets/icon/beach.png';
 import {useNavigation} from '@react-navigation/native';
+import iconHeart from '../../assets/icon/iconHeart.png';
 
-export default function DetailHomeStay() {
+export default function DetailHomeStay({route}) {
+  const data = route.params;
+  // console.log(data);
   const [showReadMore, setShowReadMore] = useState(false);
   const navigation = useNavigation();
 
@@ -18,29 +28,33 @@ export default function DetailHomeStay() {
     setShowReadMore(!showReadMore);
   };
 
+  const book = () => {
+    Alert.alert('booking succesfuly');
+  };
+
   const back = () => {
     navigation.goBack();
   };
   return (
     <View style={styles.section}>
-      <NewBack pageTitle="About HomeStay" goBack={back} />
+      <NewBack pageTitle="About HomeStay" goBack={back} icon={iconHeart} />
       <View style={styles.image}>
         <Image source={iconImage} style={styles.img} />
       </View>
       <View style={styles.content}>
         <View style={styles.subTittle}>
-          <Text style={styles.title}>Royal Oasis Resort</Text>
+          <Text style={styles.title}>{data?.name_homestay}</Text>
           <View style={styles.location}>
             <Image source={iconLocation} style={styles.iconLocation} />
-            <Text style={styles.textLocation}>Anyer Serang</Text>
+            <Text style={styles.textLocation}>{data?.location}</Text>
           </View>
           <View style={styles.rating}>
-            <Text style={styles.textRating}>4.9</Text>
+            <Text style={styles.textRating}>{data?.rating}</Text>
             <Image source={star} style={styles.star} />
           </View>
         </View>
         <View>
-          <Text style={styles.price}>$3,899</Text>
+          <Text style={styles.price}>{data?.price}</Text>
           <Text style={styles.night}>Per night</Text>
         </View>
       </View>
@@ -53,25 +67,25 @@ export default function DetailHomeStay() {
           <View style={styles.ImageFacility}>
             <Image source={wifi} style={styles.IconImageFacilty} />
           </View>
-          <Text>Free Wifi</Text>
+          <Text style={styles.textFacility}>Free Wifi</Text>
         </View>
         <View style={styles.iconFacilty}>
           <View style={styles.ImageFacility}>
             <Image source={fitnes} style={styles.IconImageFacilty} />
           </View>
-          <Text>Fitness</Text>
+          <Text style={styles.textFacility}>Fitness</Text>
         </View>
         <View style={styles.iconFacilty}>
           <View style={styles.ImageFacility}>
             <Image source={breakFast} style={styles.IconImageFacilty} />
           </View>
-          <Text>BreakFast</Text>
+          <Text style={styles.textFacility}>BreakFast</Text>
         </View>
         <View style={styles.iconFacilty}>
           <View style={styles.ImageFacility}>
             <Image source={beach} style={styles.IconImageFacilty} />
           </View>
-          <Text>Beach</Text>
+          <Text style={styles.textFacility}>Beach</Text>
         </View>
       </View>
       <View>
@@ -94,7 +108,7 @@ export default function DetailHomeStay() {
           </Text>
         </View>
       </View>
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={book}>
         <Text style={styles.textButton}>Book Now</Text>
       </TouchableOpacity>
     </View>
@@ -144,6 +158,7 @@ const styles = StyleSheet.create({
     lineHeight: 26,
     color: '#171621',
     paddingBottom: 5,
+    fontFamily: 'Inter-SemiBold',
   },
   iconLocation: {
     width: 22,
@@ -155,6 +170,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '400',
     lineHeight: 22,
+    fontFamily: 'Inter-Regular',
   },
   textRating: {
     fontSize: 16,
@@ -162,6 +178,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     color: '#171621',
     marginRight: 5,
+    fontFamily: 'Inter-Regular',
   },
   star: {
     width: 24,
@@ -173,12 +190,14 @@ const styles = StyleSheet.create({
     lineHeight: 32,
     color: '#171621',
     paddingBottom: 5,
+    fontFamily: 'Inter-SemiBold',
   },
   night: {
     fontSize: 14,
     fontWeight: '400',
     lineHeight: 22,
     color: '#A3A3A3',
+    fontFamily: 'Inter-Regular',
   },
   SubFacility: {
     display: 'flex',
@@ -188,15 +207,15 @@ const styles = StyleSheet.create({
   },
   titleFacility: {
     fontSize: 18,
-    fontWeight: '600',
     lineHeight: 26,
     color: '#171621',
+    fontFamily: 'Inter-SemiBold',
   },
   seeAll: {
     color: '#FA9F54',
     fontSize: 14,
-    fontWeight: '500',
     lineHeight: 22,
+    fontFamily: 'Inter-Medium',
   },
   SubIconFacility: {
     display: 'flex',
@@ -221,6 +240,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 40,
     backgroundColor: '#F1F1F1',
+    marginBottom: 6,
   },
   IconImageFacilty: {
     width: 24,
@@ -231,18 +251,20 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     lineHeight: 26,
     color: '#171621',
+    fontFamily: 'Inter-SemiBold',
   },
   textDescription: {
     fontSize: 14,
     fontWeight: '400',
     lineHeight: 22,
     color: '#737373',
+    fontFamily: 'Inter-Regular',
   },
   readMore: {
     fontSize: 14,
-    fontWeight: '500',
     lineHeight: 22,
     color: '#FA9F54',
+    fontFamily: 'Inter-Medium',
   },
   button: {
     width: '100%',
@@ -265,5 +287,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     lineHeight: 26,
+    fontFamily: 'PlusJakartaSans-SemiBold',
+  },
+  textFacility: {
+    fontFamily: 'Inter-Regular',
+    color: '#A1A7B0',
+    fontSize: 12,
   },
 });

@@ -9,6 +9,9 @@ import detailAttendance from '../screens/detailAttendance/detailAttendance';
 import Search from '../screens/search/search';
 import Home from '../screens/home/Home';
 import DetailHomeStay from '../screens/detailHomeStay/detailHomeStay';
+import Bookings from '../screens/bookings/bookings';
+import {Image} from 'react-native';
+import booking from '../assets/icon/calendar-tick.png';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -19,6 +22,10 @@ const Routes = () => {
   );
   const searchIcon = ({color, size}) => (
     <Feather name="search" color={color} size={size} />
+  );
+
+  const detailIcon = ({color, size}) => (
+    <Image source={booking} color={color} size={size} />
   );
 
   return (
@@ -42,6 +49,15 @@ const Routes = () => {
         options={{
           title: 'Search',
           tabBarIcon: searchIcon,
+          headerShown: false,
+        }}
+      />
+      <Tab.Screen
+        name="Bookings"
+        component={Bookings}
+        options={{
+          title: 'Bookings',
+          tabBarIcon: detailIcon,
           headerShown: false,
         }}
       />

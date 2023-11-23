@@ -8,94 +8,119 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import notification from '../../assets/icon/solar_bell-linear.png';
 import EvilIcon from 'react-native-vector-icons/EvilIcons';
 import search from '../../assets/icon/Search.png';
 import tuning from '../../assets/icon/solar_tuning-linear.png';
-import {TabView, SceneMap, TabBar} from 'react-native-tab-view';
+import {TabView, TabBar} from 'react-native-tab-view';
 import iconImage from '../../assets/icon/solar_gallery-bold.png';
 import iconLocation from '../../assets/icon/solar_map-point-outline.png';
 import solarStarBold from '../../assets/icon/solar_star-bold.png';
 import heartIcon from '../../assets/icon/Heart.png';
 import iconLocationWhite from '../../assets/icon/solar_map-point-outline-white.png';
 import {useNavigation} from '@react-navigation/native';
+import data from '../../utils/homeStay';
 
-const First = ({goDetail}) => (
-  <View style={styles.tab1}>
-    <View style={styles.subHomeStay}>
-      <Text style={styles.textHomeStay}>Homestays Near You</Text>
-      <Text style={styles.textSeeAll}>See All</Text>
-    </View>
-    <View style={styles.card}>
-      <TouchableOpacity style={styles.card1} onPress={goDetail}>
-        <View style={styles.topCard}>
-          <View style={styles.topCardIcon}>
-            <Image source={solarStarBold} style={styles.iconStar} />
-            <Text style={styles.textStar}>4.95</Text>
-          </View>
-          <Image source={heartIcon} style={styles.heartIcon} />
-        </View>
-        <View style={styles.cardImage}>
-          <Image source={iconImage} style={styles.iconImage} />
-        </View>
-        <View style={styles.cardContent}>
-          <Text style={styles.textTitle}>Island Bliss Resort</Text>
-          <View style={styles.cardLocation}>
-            <Image source={iconLocation} style={styles.cardIcon1} />
-            <Text style={styles.textCardLocation}>Anyer Serang</Text>
-          </View>
-          <Text style={styles.price}>$580/night</Text>
-        </View>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.card2}>
-        <View style={styles.topCard}>
-          <View style={styles.topCardIcon}>
-            <Image source={solarStarBold} style={styles.iconStar} />
-            <Text style={styles.textStar}>4.8</Text>
-          </View>
-          <Image source={heartIcon} style={styles.heartIcon} />
-        </View>
-        <View style={styles.cardImage}>
-          <Image source={iconImage} style={styles.iconImage} />
-        </View>
-        <View style={styles.cardContent}>
-          <Text style={styles.textTitle}>Luxo Suites Hotel</Text>
-          <View style={styles.cardLocation}>
-            <Image source={iconLocation} style={styles.cardIcon1} />
-            <Text style={styles.textCardLocation}>Kota Serang</Text>
-          </View>
-          <Text style={styles.price}>$380/night</Text>
-        </View>
-      </TouchableOpacity>
-    </View>
-    <View style={styles.subHomeStay}>
-      <Text style={styles.textHomeStay}>Popular Homestay</Text>
-      <Text style={styles.textSeeAll}>See All</Text>
-    </View>
-    <View style={styles.popularCard}>
-      <View style={styles.cardImage2}>
-        <Image source={iconImage} />
+const First = ({goDetail}) => {
+  const [sortedData, setSortedData] = useState(data);
+
+  useEffect(() => {
+    const sorted = [...data].sort((a, b) => b.rating - a.rating);
+    setSortedData(sorted);
+  }, []);
+
+  return (
+    <View style={styles.tab1}>
+      <View style={styles.subHomeStay}>
+        <Text style={styles.textHomeStay}>Homestays Near You</Text>
+        <Text style={styles.textSeeAll}>See All</Text>
       </View>
-      <View style={styles.popularCardContent}>
-        <Text style={styles.subPopular}>Backpackers Hostel</Text>
-        <View style={styles.cardLocation}>
-          <Image source={iconLocationWhite} style={styles.cardIcon1} />
-          <Text style={styles.textPopularLocation}>Anyer Serang</Text>
-        </View>
-        <View style={styles.popularIcon}>
-          <Text style={styles.textStarPopular}>4.98</Text>
-          <Image source={solarStarBold} style={styles.iconStar} />
-        </View>
-        <Text style={styles.popularPrice}>$580/Night</Text>
+      <View style={styles.card}>
+        <FlatList
+          data={data}
+          horizontal={true}
+          showsHorizontalScrollIndicator={false}
+          renderItem={({item, index}) => (
+            <TouchableOpacity
+              style={styles.card1}
+              onPress={() => goDetail(item)}
+              key={index}>
+              <View style={styles.topCard}>
+                <View style={styles.topCardIcon}>
+                  <Image source={solarStarBold} style={styles.iconStar} />
+                  <Text style={styles.textStar}>{item?.rating}</Text>
+                </View>
+                <Image source={heartIcon} style={styles.heartIcon} />
+              </View>
+              <View style={styles.cardImage}>
+                <Image source={iconImage} style={styles.iconImage} />
+              </View>
+              <View style={styles.cardContent}>
+                <Text style={styles.textTitle}>{item?.name_homestay}</Text>
+                <View style={styles.cardLocation}>
+                  <Image source={iconLocation} style={styles.cardIcon1} />
+                  <Text style={styles.textCardLocation}>{item?.location}</Text>
+                </View>
+                <Text style={styles.price}>{item?.price}/night</Text>
+              </View>
+            </TouchableOpacity>
+          )}
+        />
       </View>
+      <View style={styles.subHomeStay}>
+        <Text style={styles.textPopularHomeStay}>Popular Homestay</Text>
+        <Text style={styles.textSeeAll}>See All</Text>
+      </View>
+      <FlatList
+        data={sortedData}
+        showsVerticalScrollIndicator={false}
+        renderItem={({item, index}) => (
+          <TouchableOpacity
+            style={styles.popularCard}
+            key={index}
+            onPress={() => goDetail(item)}>
+            <View style={styles.cardImage2}>
+              <Image source={iconImage} />
+            </View>
+            <View style={styles.popularCardContent}>
+              <Text style={styles.subPopular}>{item.name_homestay}</Text>
+              <View style={styles.cardLocation}>
+                <Image source={iconLocationWhite} style={styles.cardIcon1} />
+                <Text style={styles.textPopularLocation}>{item.location}</Text>
+              </View>
+              <View style={styles.popularIcon}>
+                <Text style={styles.textStarPopular}>{item.rating}</Text>
+                <Image source={solarStarBold} style={styles.iconStar} />
+              </View>
+              <Text style={styles.popularPrice}>{item.price}/Night</Text>
+            </View>
+          </TouchableOpacity>
+        )}
+      />
     </View>
+  );
+};
+const Second = () => (
+  <View style={styles.Hotels}>
+    <Text>No Data for Hotels</Text>
   </View>
 );
-const Second = () => <View style={{flex: 1, backgroundColor: '#673ab7'}} />;
-const Third = () => <View style={{flex: 1, backgroundColor: '#673ab7'}} />;
-const Fourth = () => <View style={{flex: 1, backgroundColor: '#673ab7'}} />;
-const Fifth = () => <View style={{flex: 1, backgroundColor: '#673ab7'}} />;
+const Third = () => (
+  <View style={styles.Hotels}>
+    <Text>No Data for Villas</Text>
+  </View>
+);
+const Fourth = () => (
+  <View style={styles.Hotels}>
+    <Text>No Data for Guest House</Text>
+  </View>
+);
+const Fifth = () => (
+  <View style={styles.Hotels}>
+    <Text>No Data for Hostels</Text>
+  </View>
+);
 
 export default function Home() {
   const layout = useWindowDimensions();
@@ -107,11 +132,11 @@ export default function Home() {
     {key: 'second', title: 'Hotels'},
     {key: 'third', title: 'Villas'},
     {key: 'fourth', title: 'Guest Houses'},
-    {key: 'five', title: 'Hostels'},
+    {key: 'fifth', title: 'Hostels'},
   ]);
 
-  const goDetail = () => {
-    navigation.navigate('DetailHomeStay');
+  const goDetail = item => {
+    navigation.navigate('DetailHomeStay', item);
   };
 
   const renderScene = ({route}) => {
@@ -130,6 +155,7 @@ export default function Home() {
         return null;
     }
   };
+
   return (
     <View style={styles.section}>
       <View style={styles.header}>
@@ -172,12 +198,22 @@ export default function Home() {
           return (
             <TabBar
               {...props}
-              style={{
-                backgroundColor: 'transparent',
-                display: 'flex',
-              }}
-              labelStyle={{color: '#171621', fontSize: 14}}
-              tabStyle={{flex: 1}}
+              style={styles.tabBar}
+              scrollEnabled
+              renderLabel={({route, focused, color}) => (
+                <View>
+                  <Text
+                    style={[
+                      styles.titleTabsInactive,
+                      focused && styles.titleTabsActive,
+                    ]}>
+                    {route.title}
+                  </Text>
+                </View>
+              )}
+              indicatorStyle={styles.indicatorStyle}
+              tabStyle={styles.tabStyle}
+              gap={0}
             />
           );
         }}
@@ -214,6 +250,7 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     color: '#737373',
     lineHeight: 22,
+    fontFamily: 'PlusJakartaSans-Regular',
   },
   bgIcon: {
     width: 40,
@@ -231,8 +268,8 @@ const styles = StyleSheet.create({
   textDetailLocation: {
     color: '#171621',
     fontSize: 14,
-    fontWeight: '500',
     lineHeight: 22,
+    fontFamily: 'PlusJakartaSans-Medium',
   },
   icon2: {width: 20, height: 20},
 
@@ -246,10 +283,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     marginVertical: 20,
     fontSize: 16,
-    fontStyle: 'normal',
-    fontWeight: '400',
     lineHeight: 24,
     color: 'black',
+    fontFamily: 'PlusJakartaSans-Regular',
   },
   headInput: {
     position: 'relative',
@@ -273,8 +309,8 @@ const styles = StyleSheet.create({
   placeholderStyle: {
     fontSize: 16,
     fontStyle: 'normal',
-    fontWeight: '400',
     lineHeight: 24,
+    fontFamily: 'PlusJakartaSans-Regular',
   },
   subCategory: {
     display: 'flex',
@@ -286,12 +322,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     lineHeight: 22,
     color: '#171621',
+    fontFamily: 'Inter-SemiBold',
   },
   textSeeAll: {
     fontSize: 14,
     fontWeight: '500',
     lineHeight: 22,
     color: '#FA9F54',
+    fontFamily: 'Inter-Medium',
   },
   tab1: {
     flex: 1,
@@ -308,6 +346,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     lineHeight: 24,
     color: '#171621',
+    fontFamily: 'PlusJakartaSans-SemiBold',
+  },
+  textPopularHomeStay: {
+    fontSize: 16,
+    fontWeight: '600',
+    lineHeight: 24,
+    color: '#171621',
+    fontFamily: 'Inter-SemiBold',
   },
   card: {
     // height: 227,
@@ -323,6 +369,7 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
     paddingHorizontal: 12,
     paddingTop: 20,
+    marginRight: 12,
   },
   card2: {
     backgroundColor: '#D9D9D9',
@@ -355,6 +402,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     lineHeight: 22,
+    fontFamily: 'Inter-SemiBold',
   },
   cardLocation: {
     display: 'flex',
@@ -362,9 +410,9 @@ const styles = StyleSheet.create({
   },
   textCardLocation: {
     fontSize: 12,
-    fontWeight: '400',
     lineHeight: 16,
     color: '#fff',
+    fontFamily: 'Inter-Regular',
   },
   cardIcon1: {
     width: 16,
@@ -372,10 +420,9 @@ const styles = StyleSheet.create({
     marginRight: 4,
   },
   price: {
-    fontFamily: 'Inter',
+    fontFamily: 'Inter-Medium',
     color: '#FFF',
     fontSize: 14,
-    fontWeight: '400',
     lineHeight: 22,
   },
   topCardIcon: {
@@ -392,6 +439,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '500',
     lineHeight: 16,
+    fontFamily: 'Inter-Medium',
   },
   heartIcon: {
     width: 16,
@@ -400,6 +448,7 @@ const styles = StyleSheet.create({
   popularCard: {
     display: 'flex',
     flexDirection: 'row',
+    marginBottom: 10,
   },
   cardImage2: {
     width: 119,
@@ -417,17 +466,18 @@ const styles = StyleSheet.create({
   },
   subPopular: {
     color: '#171621',
-    fontFamily: 'Inter',
+    fontFamily: 'Inter-SemiBold',
     fontSize: 16,
-    fontWeight: '600',
     lineHeight: 22,
+    paddingBottom: 5,
   },
   textPopularLocation: {
-    fontFamily: 'Inter',
+    fontFamily: 'Inter-Regular',
     fontSize: 12,
     fontWeight: '400',
     lineHeight: 16,
     color: '#A3A3A3',
+    paddingBottom: 6,
   },
   popularIcon: {
     display: 'flex',
@@ -436,17 +486,40 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   textStarPopular: {
-    fontFamily: 'Plus Jakarta Sans',
+    fontFamily: 'PlusJakartaSans-Regular',
     fontSize: 14,
     fontWeight: '400',
     lineHeight: 22,
     marginRight: 3,
   },
   popularPrice: {
-    fontFamily: 'Inter',
+    fontFamily: 'Inter-Medium',
     fontSize: 16,
     fontWeight: '500',
     lineHeight: 24,
     color: '#171621',
+  },
+  titleTabsInactive: {
+    fontFamily: 'PlusJakartaSans-Regular',
+    fontSize: 14,
+    color: '#A3A3A3',
+    lineHeight: 22,
+  },
+  titleTabsActive: {
+    fontWeight: '600',
+    color: '#171621',
+    lineHeight: 22,
+  },
+  tabBar: {
+    backgroundColor: 'transparent',
+  },
+  tabStyle: {width: 'auto', marginRight: 5},
+  Hotels: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  indicatorStyle: {
+    backgroundColor: '#171621',
   },
 });
