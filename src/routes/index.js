@@ -8,6 +8,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import detailAttendance from '../screens/detailAttendance/detailAttendance';
 import Search from '../screens/search/search';
 import Home from '../screens/home/Home';
+import DetailHomeStay from '../screens/detailHomeStay/detailHomeStay';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -70,6 +71,11 @@ const Router = () => {
         <Stack.Screen
           name="DetailAttendance"
           component={detailAttendance}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="DetailHomeStay"
+          component={DetailHomeStay}
           options={{headerShown: false}}
         />
       </Stack.Navigator>
