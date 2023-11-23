@@ -13,7 +13,7 @@ import {
 import data from '../../utils/data';
 import {useNavigation} from '@react-navigation/native';
 
-export default function HomePage() {
+export default function Search() {
   const [search, setSearch] = useState('');
   const navigation = useNavigation();
   const [refresh, setRefresh] = useState(false);
